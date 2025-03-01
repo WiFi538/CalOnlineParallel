@@ -44,17 +44,25 @@ func tokenize(expression string) []string {
 func shuntingYard(tokens []string) ([]*Task, error) {
 	opStack := make([]string, 0)
 	output := make([]*Task, 0)
+	numStack := make([]string, 0)
 
 	for _, token := range tokens {
 		if isNumber(token) {
-			output = append(output, &Task{Arg1: token})
+			numStack = append(numStack, token)
 		} else if token == "(" {
 			opStack = append(opStack, token)
 		} else if token == ")" {
 			for len(opStack) > 0 && opStack[len(opStack)-1] != "(" {
 				op := opStack[len(opStack)-1]
 				opStack = opStack[:len(opStack)-1]
-				output = append(output, &Task{Operation: op})
+				if len(numStack) < 2 {
+					return nil, errors.New("недостаточно операндов для операции")
+				}
+				arg2 := numStack[len(numStack)-1]
+				arg1 := numStack[len(numStack)-2]
+				numStack = numStack[:len(numStack)-2]
+				output = append(output, &Task{Arg1: arg1, Arg2: arg2, Operation: op})
+				numStack = append(numStack, "temp") // Временный результат
 			}
 			if len(opStack) == 0 {
 				return nil, errors.New("unbalanced parentheses")
@@ -64,7 +72,14 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 			for len(opStack) > 0 && precedence(opStack[len(opStack)-1]) >= precedence(token) {
 				op := opStack[len(opStack)-1]
 				opStack = opStack[:len(opStack)-1]
-				output = append(output, &Task{Operation: op})
+				if len(numStack) < 2 {
+					return nil, errors.New("недостаточно операндов для операции")
+				}
+				arg2 := numStack[len(numStack)-1]
+				arg1 := numStack[len(numStack)-2]
+				numStack = numStack[:len(numStack)-2]
+				output = append(output, &Task{Arg1: arg1, Arg2: arg2, Operation: op})
+				numStack = append(numStack, "temp") // Временный результат
 			}
 			opStack = append(opStack, token)
 		} else {
@@ -78,7 +93,14 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 		}
 		op := opStack[len(opStack)-1]
 		opStack = opStack[:len(opStack)-1]
-		output = append(output, &Task{Operation: op})
+		if len(numStack) < 2 {
+			return nil, errors.New("недостаточно операндов для операции")
+		}
+		arg2 := numStack[len(numStack)-1]
+		arg1 := numStack[len(numStack)-2]
+		numStack = numStack[:len(numStack)-2]
+		output = append(output, &Task{Arg1: arg1, Arg2: arg2, Operation: op})
+		numStack = append(numStack, "temp") // Временный результат
 	}
 
 	return output, nil
