@@ -36,6 +36,11 @@ func (o *Orchestrator) AddExpression(expression string) (string, error) {
 		return "", err
 	}
 
+	// Добавляем ExpressionID к каждой задаче
+	for _, task := range tasks {
+		task.ExpressionID = id
+	}
+
 	o.mu.Lock()
 	o.tasks = append(o.tasks, tasks...)
 	o.mu.Unlock()
