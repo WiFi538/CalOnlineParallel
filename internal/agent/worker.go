@@ -17,6 +17,7 @@ type Task struct {
 	Arg2          string `json:"arg2"`
 	Operation     string `json:"operation"`
 	OperationTime int    `json:"operation_time"`
+	ExpressionID  string `json:"expression_id"` // Добавляем связь с выражением
 }
 
 type TaskResult struct {
