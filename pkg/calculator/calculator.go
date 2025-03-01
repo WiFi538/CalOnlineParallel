@@ -37,7 +37,6 @@ func Calc(expression string) (float64, error) {
 		return nil
 	}
 
-	//определение приоритета операции
 	priority := func(op rune) int {
 		switch op {
 		case '+', '-':
@@ -48,7 +47,6 @@ func Calc(expression string) (float64, error) {
 		return 0
 	}
 
-	//обработка чисел
 	for i := 0; i < len(expression); i++ {
 		char := rune(expression[i])
 		if unicode.IsDigit(char) {
@@ -57,8 +55,6 @@ func Calc(expression string) (float64, error) {
 				return 0, err
 			}
 			numStack = append(numStack, num)
-
-			//обработка открывающей и закрывающей скобок
 		} else if char == '(' {
 			opStack = append(opStack, char)
 		} else if char == ')' {
@@ -72,8 +68,6 @@ func Calc(expression string) (float64, error) {
 				return 0, errors.New("несогласованные скобки")
 			}
 			opStack = opStack[:len(opStack)-1]
-
-			//обработка операций
 		} else if char == '+' || char == '-' || char == '*' || char == '/' {
 			for len(opStack) > 0 && priority(opStack[len(opStack)-1]) >= priority(char) {
 				if err := doOp(opStack[len(opStack)-1]); err != nil {
@@ -82,8 +76,6 @@ func Calc(expression string) (float64, error) {
 				opStack = opStack[:len(opStack)-1]
 			}
 			opStack = append(opStack, char)
-
-			//обработка пробелов
 		} else if char != ' ' {
 			return 0, errors.New("недопустимый символ в выражении")
 		}
@@ -99,7 +91,6 @@ func Calc(expression string) (float64, error) {
 		opStack = opStack[:len(opStack)-1]
 	}
 
-	//результат один элемент стека
 	if len(numStack) != 1 {
 		return 0, errors.New("некорректное выражение")
 	}
