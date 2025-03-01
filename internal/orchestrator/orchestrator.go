@@ -82,6 +82,7 @@ func (o *Orchestrator) CompleteTask(taskID string, result float64) error {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
+	// Находим выражение, связанное с задачей
 	for _, expr := range o.expressions {
 		if expr.ID == taskID {
 			expr.Result = result
