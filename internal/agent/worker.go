@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
-
-	"github.com/wifi538/CalOnlineParallel/pkg/calculator"
 )
 
 type Task struct {
@@ -83,8 +82,30 @@ func getTask() (*Task, error) {
 }
 
 func calculateTask(task *Task) (float64, error) {
-	expression := task.Arg1 + " " + task.Operation + " " + task.Arg2
-	return calculator.Calc(expression)
+	arg1, err := strconv.ParseFloat(task.Arg1, 64)
+	if err != nil {
+		return 0, err
+	}
+	arg2, err := strconv.ParseFloat(task.Arg2, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	switch task.Operation {
+	case "+":
+		return arg1 + arg2, nil
+	case "-":
+		return arg1 - arg2, nil
+	case "*":
+		return arg1 * arg2, nil
+	case "/":
+		if arg2 == 0 {
+			return 0, errors.New("деление на ноль")
+		}
+		return arg1 / arg2, nil
+	default:
+		return 0, errors.New("неизвестная операция")
+	}
 }
 
 func sendResult(taskID string, result float64) error {
