@@ -44,11 +44,15 @@ func tokenize(expression string) []string {
 func shuntingYard(tokens []string) ([]*Task, error) {
 	opStack := make([]string, 0)
 	output := make([]*Task, 0)
-	numStack := make([]string, 0)
+	numStack := make([]float64, 0)
 
 	for _, token := range tokens {
 		if isNumber(token) {
-			numStack = append(numStack, token)
+			num, err := strconv.ParseFloat(token, 64)
+			if err != nil {
+				return nil, err
+			}
+			numStack = append(numStack, num)
 		} else if token == "(" {
 			opStack = append(opStack, token)
 		} else if token == ")" {
@@ -61,8 +65,9 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 				arg2 := numStack[len(numStack)-1]
 				arg1 := numStack[len(numStack)-2]
 				numStack = numStack[:len(numStack)-2]
-				output = append(output, &Task{Arg1: arg1, Arg2: arg2, Operation: op})
-				numStack = append(numStack, "temp") // Временный результат
+				output = append(output, &Task{Arg1: strconv.FormatFloat(arg1, 'f', -1, 64), Arg2: strconv.FormatFloat(arg2, 'f', -1, 64), Operation: op})
+				result := calculate(arg1, arg2, op)
+				numStack = append(numStack, result)
 			}
 			if len(opStack) == 0 {
 				return nil, errors.New("unbalanced parentheses")
@@ -78,8 +83,9 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 				arg2 := numStack[len(numStack)-1]
 				arg1 := numStack[len(numStack)-2]
 				numStack = numStack[:len(numStack)-2]
-				output = append(output, &Task{Arg1: arg1, Arg2: arg2, Operation: op})
-				numStack = append(numStack, "temp") // Временный результат
+				output = append(output, &Task{Arg1: strconv.FormatFloat(arg1, 'f', -1, 64), Arg2: strconv.FormatFloat(arg2, 'f', -1, 64), Operation: op})
+				result := calculate(arg1, arg2, op)
+				numStack = append(numStack, result)
 			}
 			opStack = append(opStack, token)
 		} else {
@@ -99,11 +105,27 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 		arg2 := numStack[len(numStack)-1]
 		arg1 := numStack[len(numStack)-2]
 		numStack = numStack[:len(numStack)-2]
-		output = append(output, &Task{Arg1: arg1, Arg2: arg2, Operation: op})
-		numStack = append(numStack, "temp") // Временный результат
+		output = append(output, &Task{Arg1: strconv.FormatFloat(arg1, 'f', -1, 64), Arg2: strconv.FormatFloat(arg2, 'f', -1, 64), Operation: op})
+		result := calculate(arg1, arg2, op)
+		numStack = append(numStack, result)
 	}
 
 	return output, nil
+}
+
+func calculate(arg1, arg2 float64, op string) float64 {
+	switch op {
+	case "+":
+		return arg1 + arg2
+	case "-":
+		return arg1 - arg2
+	case "*":
+		return arg1 * arg2
+	case "/":
+		return arg1 / arg2
+	default:
+		return 0
+	}
 }
 
 func isNumber(token string) bool {
