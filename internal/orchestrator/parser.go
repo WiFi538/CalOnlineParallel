@@ -52,8 +52,9 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 			opStack = append(opStack, token)
 		} else if token == ")" {
 			for len(opStack) > 0 && opStack[len(opStack)-1] != "(" {
-				output = append(output, &Task{Operation: opStack[len(opStack)-1]})
+				op := opStack[len(opStack)-1]
 				opStack = opStack[:len(opStack)-1]
+				output = append(output, &Task{Operation: op})
 			}
 			if len(opStack) == 0 {
 				return nil, errors.New("unbalanced parentheses")
@@ -61,8 +62,9 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 			opStack = opStack[:len(opStack)-1]
 		} else if isOperator(token) {
 			for len(opStack) > 0 && precedence(opStack[len(opStack)-1]) >= precedence(token) {
-				output = append(output, &Task{Operation: opStack[len(opStack)-1]})
+				op := opStack[len(opStack)-1]
 				opStack = opStack[:len(opStack)-1]
+				output = append(output, &Task{Operation: op})
 			}
 			opStack = append(opStack, token)
 		} else {
@@ -74,8 +76,9 @@ func shuntingYard(tokens []string) ([]*Task, error) {
 		if opStack[len(opStack)-1] == "(" {
 			return nil, errors.New("unbalanced parentheses")
 		}
-		output = append(output, &Task{Operation: opStack[len(opStack)-1]})
+		op := opStack[len(opStack)-1]
 		opStack = opStack[:len(opStack)-1]
+		output = append(output, &Task{Operation: op})
 	}
 
 	return output, nil
