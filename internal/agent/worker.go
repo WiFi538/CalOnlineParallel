@@ -3,6 +3,8 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -55,11 +57,22 @@ func getTask() (*Task, error) {
 	}
 	defer resp.Body.Close()
 
-	var task Task
-	if err := json.NewDecoder(resp.Body).Decode(&task); err != nil {
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var taskResponse struct {
+		Task *Task `json:"task"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&taskResponse); err != nil {
 		return nil, err
 	}
-	return &task, nil
+
+	if taskResponse.Task == nil {
+		return nil, errors.New("no task available")
+	}
+
+	return taskResponse.Task, nil
 }
 
 func calculateTask(task *Task) (float64, error) {
@@ -83,6 +96,10 @@ func sendResult(taskID string, result float64) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
 	return nil
 }
