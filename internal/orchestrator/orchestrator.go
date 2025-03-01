@@ -83,7 +83,7 @@ func (o *Orchestrator) CompleteTask(taskID string, result float64) error {
 	defer o.mu.Unlock()
 
 	for _, expr := range o.expressions {
-		if expr.Status == "pending" {
+		if expr.ID == taskID {
 			expr.Result = result
 			expr.Status = "completed"
 			return nil
