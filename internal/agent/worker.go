@@ -26,10 +26,14 @@ type TaskResult struct {
 }
 
 func Worker() {
+	var errorLogged bool
 	for {
 		task, err := getTask()
 		if err != nil {
-			log.Printf("Error getting task: %v", err)
+			if !errorLogged {
+				log.Printf("Error getting task: %v", err)
+				errorLogged = true
+			}
 			time.Sleep(1 * time.Second)
 			continue
 		}
@@ -47,6 +51,9 @@ func Worker() {
 			time.Sleep(1 * time.Second)
 			continue
 		}
+
+		// Сброс флага после успешного выполнения задачи
+		errorLogged = false
 	}
 }
 
